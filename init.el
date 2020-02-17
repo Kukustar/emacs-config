@@ -16,7 +16,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (exec-path-from-shell web-mode json-mode js2-mode flycheck))))
+    (add-node-modules-path prettier-js xref-js2 exec-path-from-shell web-mode json-mode js2-mode flycheck))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -94,5 +94,46 @@
 (require 'neotree)
 (global-set-key "\C-t" 'neotree-toggle)
 
+
+;;(require 'js2-mode)
+;;(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
+;; Better imenu
+;;(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+
+;;(require 'js2-refactor)
+;;(require 'xref-js2)
+
+;;(add-hook 'js2-mode-hook #'js2-refactor-mode)
+;;(js2r-add-keybindings-with-prefix "C-c C-r")
+;;(define-key js2-mode-map (kbd "C-k") #'js2r-kill)
+
+;; js-mode (which js2 is based on) binds "M-." which conflicts with xref, so
+;; unbind it.
+;;(define-key js-mode-map (kbd "M-.") nil)
+
+;;(add-hook 'js2-mode-hook (lambda ()
+ ;; (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
+
+(ac-config-default)
+
+(global-auto-complete-mode t)
+
+;; linter settings
+(require 'prettier-js)
+(add-hook 'web-mode-hook 'prettier-js-mode)
+
+(defun enable-minor-mode (my-pair)
+  "Enable minor mode if filename match the regexp.  MY-PAIR is a cons cell (regexp . minor-mode)."
+  (if (buffer-file-name)
+      (if (string-match (car my-pair) buffer-file-name)
+	  (funcall (cdr my-pair)))))
+
+(add-hook 'web-mode-hook #'(lambda ()
+                            (enable-minor-mode
+                             '("\\.js?\\'" . prettier-js-mode))))
+
+(eval-after-load 'js-mode
+  '(add-hook 'js-mode-hook #'add-node-modules-path))
 
 
